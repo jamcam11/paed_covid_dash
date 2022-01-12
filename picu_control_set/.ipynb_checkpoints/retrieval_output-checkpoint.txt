@@ -1,0 +1,12 @@
+nohup: ignoring input
+Traceback (most recent call last):
+  File "covid_script.py", line 1, in <module>
+    from cadmus import bioscraping
+  File "/home/jcampbell/miniconda3/lib/python3.7/site-packages/cadmus/__init__.py", line 1, in <module>
+    from cadmus.pre_retrieval.output_files import output_files
+  File "/home/jcampbell/miniconda3/lib/python3.7/site-packages/cadmus/pre_retrieval/__init__.py", line 3, in <module>
+    from cadmus.pre_retrieval.pdat_to_datetime import pdat_to_datetime
+  File "/home/jcampbell/miniconda3/lib/python3.7/site-packages/cadmus/pre_retrieval/pdat_to_datetime.py", line 8
+    return(None)
+               ^
+IndentationError: unindent does not match any outer indentation level
