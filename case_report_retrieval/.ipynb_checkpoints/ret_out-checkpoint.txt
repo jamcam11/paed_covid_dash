@@ -1,0 +1,5 @@
+nohup: ignoring input
+  File "/home/jcampbell/paed_covid_case_reports/case_report_retrieval/covid_script.py", line 1
+    conda activate gopher
+                 ^
+SyntaxError: invalid syntax

@@ -1,0 +1,6 @@
+starting bioscraping
+There is already a Retrieved Dataframe, we shall add new results to this existing dataframe, excluding duplicates.
+We are not updating the previous search(es) of the DataFrame, only looking for new lines
+This look like a search string or list of pmids. 
+If this is not correct Please stop now
+There are no new lines since your previous search - stop the function.
