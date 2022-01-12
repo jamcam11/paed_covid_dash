@@ -1,0 +1,18 @@
+nohup: ignoring input
+
+We've got 977 articles to train the model with
+vectorising the training set
+saving the count vector array for the training set
+Building the token count dataframe from the training set
+counting up each term for each class
+making the token df
+Now performing Fishers exact test for token df
+correcting for multiple tests (bonferoni)
+Now setting up Bonferroni Correction
+New alpha = 3.0674846625766875e-06
+This training set yields 150 terms that reach significance
+classifying the test df
+Dropping the Empty fields and abstracts
+We've got 1672 articles to classify
+Preparing test set for classification
+classifying Test set
