@@ -21,7 +21,7 @@ print('Model Loaded')
 nlp.max_size = 2000000
 
 # set the ontology we are looking to match entities to.
-ontololgys = ['umls', 'hpo'] 
+ontololgy = 'hpo' 
 
 # Add the abbreviation pipe to the spacy pipeline.
 nlp.add_pipe("abbreviation_detector")
@@ -81,8 +81,10 @@ print(f'{len(texts)} articles ready to process')
 cui_d = {}
 
 def entity_processing(index, doc, cui_d):
-    hpos = []
-    neg_hpos = []
+    onto_terms = []
+    neg_onto_terms = []
+    triggers = []
+    neg_triggers =[]
     ents = [ent for ent in doc.ents]
     ents.extend([abrv for abrv in doc._.abbreviations])
     for ent in ents:
@@ -95,22 +97,24 @@ def entity_processing(index, doc, cui_d):
             if mention:
                 # then we get the cui details (mainly the name)
                 trigger = doc[ent.start:ent.end].text
-                hpo = linker.kb.cui_to_entity[mention[0]]
-                if hpo is not None:
+                onto_term = linker.kb.cui_to_entity[mention[0]]
+                if onto_term is not None:
                     # the result is a sring that needs a bit of parsing
-                    hpo = str(hpo).split('\n')[0].split(', ')
-                    cui = hpo[0].replace('CUI: ','')
-                    hpo_str = hpo[1].replace('Name: ','')
+                    onto_term = str(onto_term).split('\n')[0].split(', ')
+                    cui = onto_term[0].replace('CUI: ','')
+                    onto_term_str = onto_term[1].replace('Name: ','')
                     
                     if ent._.negex == True: 
                         # we then store attributes for each entity starting with HPO CUI
-                        hpos.append(hpo_str)
+                        onto_terms.append(onto_term_str)
+                        triggers.append(trigger)
                     else:
-                        neg_hpos.append(hpo_str)
+                        neg_onto_terms.append(onto_term_str)
+                        neg_triggers.append(trigger)
                     # now we want to create a file for the cui or add to an existing one.
                     if cui_d.get(cui) == None:
                         cui_d.update({cui:{'indexes':[index],
-                                           'hpo_str':hpo_str,
+                                           f'{ontology}_str':onto_term_str,
                                           'sents':[ent.sent.text],
                                           'negation':[ent._.negex],
                                           'polarity':[ent.sent._.polarity],
@@ -125,15 +129,18 @@ def entity_processing(index, doc, cui_d):
                         cui_d[cui]['subj'].append(ent.sent._.subjectivity)
                         cui_d[cui]['threshold'].append(mention[1])
                         cui_d[cui]['triggers'].append(trigger)
-    return hpos, neg_hpos, cui_d
+    return onto_terms, triggers, neg_onto_terms, neg_triggers, cui_d
+
 
 # set a counter for the texts within a df
 doc_count=0
 
 print('creating spacy doc objects and parsing out the entities')
 # iterate through the texts in the current df
-hpo_d = {}
-neg_hpo_d = {}
+onto_d = {}
+trigger_d = {}
+neg_onto_d = {}
+neg_trigger_d = {}
 cui_d = {}
 for index, text in texts.items():
 
@@ -145,10 +152,12 @@ for index, text in texts.items():
     # apply our entity processing function to each entity (including abbreviations) in the doc
     # the output is a list of hpo mathced entities, one for each doc (which we will add to the retrieved df)
     # and a new dataframe indexed by each unique entity.
-    hpos, neg_hpos, cui_d = entity_processing(index, doc, cui_d)
+    onto_terms, trigger_terms, neg_onto_terms, neg_trigger_terms, cui_d = entity_processing(index, doc, cui_d)
     # we then add the hpos to the hpo_dictionary using the df index as our keys - to map back at the end.
-    hpo_d.update({index:hpos})
-    neg_hpo_d.update({index:neg_hpos})
+    onto_d.update({index:onto_terms})
+    trigger_d.update({index:trigger_terms})
+    neg_onto_d.update({index:neg_onto_terms})
+    neg_trigger_d.update({index:neg_trigger_terms})
     
 
     # print progress in df every 100 docs
@@ -160,13 +169,15 @@ for index, text in texts.items():
 
 
 # lastly we'll add the df_ents to our paed_df and save it to file
-df['hpo_ents'] = df.index.to_series().map(hpo_d)
+df[f'{ontology}_ents'] = df.index.to_series().map(onto_d)
+df[f'{ontology}_triggers'] = df.index.to_series().map(trigger_d)
 # lastly we'll add the df_ents to our paed_df and save it to file
-df['neg_hpo_ents'] = df.index.to_series().map(neg_hpo_d)
+df[f'neg_{ontology}_ents'] = df.index.to_series().map(neg_onto_d)
+df[f'neg_{ontology}_triggers'] = df.index.to_series().map(neg_trigger_d)
 # save the dataframe
-pickle.dump(df, open(f'./ctrl_hpo_ret_df2.p', 'wb'))
+pickle.dump(df, open(f'./ctrl_spacy_{ontology}_df.p', 'wb'))
 # # save the cui_df for entity exploration
-# cui_df = pd.DataFrame.from_dict(cui_d, orient = 'index')
-# pickle.dump(cui_df, open(f'./ctrl_cui_df.p', 'wb'))
+cui_df = pd.DataFrame.from_dict(cui_d, orient = 'index')
+pickle.dump(cui_df, open(f'./ctrl_{ontology}_cui_df.p', 'wb'))
 
 print('Process Complete!')
