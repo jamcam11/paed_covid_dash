@@ -1,5 +1,0 @@
-nohup: ignoring input
-  File "scispacy_doc_maker.py", line 104
-    def get_names(ent)
-                     ^
-SyntaxError: invalid syntax

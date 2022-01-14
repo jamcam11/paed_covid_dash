@@ -5,12 +5,13 @@ from collections import Counter
 import random
 import itertools
 
+ontology = 'hpo'
 
 # read in the cui_df
-cui_df = pickle.load(open('./cui_df.p', 'rb'))
+cui_df = pickle.load(open(f'./spacy_{ontology}_cui_df.p', 'rb'))
 
 # read in the retrieved df with the hpo ents column present
-df = pickle.load(open('hpo_ret_df2.p', 'rb'))
+df = pickle.load(open(f'spacy_{ontology}_df.p', 'rb'))
 
 # get the total count of each cui for the corpus
 lens = [len(set(indexes)) for indexes in cui_df['indexes']]
@@ -135,4 +136,4 @@ def tfidf_best_sents(cui_df):
 # apply the function to our cui_df
 cui_df = tfidf_best_sents(cui_df)
 # save the cui_df with the best sentences saved in a new column
-pickle.dump(cui_df, open('./cui_df.p', 'wb'))
+pickle.dump(cui_df, open(f'./spacy_{ontology}_cui_df.p', 'wb'))
